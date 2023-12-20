@@ -13,15 +13,27 @@ from PyQt6.QtGui import QImage
 class Frog:
     def __init__(self, ball_getter_func, position: QVector2D, mouse_abs_position_getter):
         self.ball_getter_func = ball_getter_func
-        self.current_ball: Ball = self.ball_getter_func()
+
         # self.next_ball: Ball = self.ball_getter_func()
         self.position = QVector2D(position)
         self.mouse_abs_position_getter = mouse_abs_position_getter
         self.forward_direction = QVector2D(1, 0)
+        self.current_ball: Ball = None
+        self.get_new_ball()
+        pass
+
+    def get_new_ball(self):
+        self.current_ball: Ball = self.ball_getter_func()
+        self.set_current_ball_position()
+        pass
+
+    def set_current_ball_position(self):
+        self.current_ball.position = self.position + self.forward_direction * 0.1
         pass
 
     def update(self):
         self._update_forward_direction()
+        self.set_current_ball_position()
         pass
 
     def _update_forward_direction(self):
@@ -38,7 +50,7 @@ class Frog:
 
     def fire_ball(self):
         ball = self.current_ball
-        self.current_ball: Ball = self.ball_getter_func()
+        self.get_new_ball()
         ball.set_trait(FlyingBall(ball, direction=self.forward_direction))
         return ball
 
