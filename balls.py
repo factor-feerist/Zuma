@@ -15,7 +15,7 @@ class Ball(TraitHolder):
 
     def is_intersected_by(self, other):
         eps = 1e-5
-        return self.position.distanceToPoint(other.position) - eps <= self.radius + other.radius
+        return self.position.distanceToPoint(other.position) - 0.05 <= self.radius + other.radius
 
 
 class RollingBall(Trait):
