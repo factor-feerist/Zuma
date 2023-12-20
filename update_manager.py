@@ -5,10 +5,11 @@ from balls import Ball, RollingBall, BallRepresentation, FlyingBall
 from route import ComplexRoute
 from random import randint
 from frog import Frog
+from skull import Skull
 
 
 class UpdateManager:
-    def __init__(self, route: ComplexRoute, mouse_rel_pos_getter, frog_position, skull_position, draw_skull_func, balls_count):
+    def __init__(self, route: ComplexRoute, mouse_rel_pos_getter, frog_position, skull: Skull, balls_count):
         self.route = route
         self.balls_by_color_id = \
             {
@@ -26,8 +27,9 @@ class UpdateManager:
                 11: 0
             }
         self.frog_position = frog_position
-        self.skull_position = skull_position
-        self.draw_skull_func = draw_skull_func
+        #self.skull_position = skull_position
+        self.skull = skull
+        #self.draw_skull_func = draw_skull_func
         self.balls_count = balls_count
         self.end_of_game = False
         self.balls_on_route = []
@@ -49,7 +51,7 @@ class UpdateManager:
 
     def draw(self, painter, width, height):
         painter.setBrush(QColor(255, 0, 0))
-        self.draw_skull_func(painter, width, height)
+        self.skull.draw(painter, width, height)
         self.frog.draw(painter, width, height)
         self.draw_balls(self.balls_on_route, painter, width, height)
         self.draw_balls(self.flying_balls, painter, width, height)

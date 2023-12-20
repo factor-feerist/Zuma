@@ -13,6 +13,10 @@ class Route(abc.ABC):
     pass
 
 
+class EndOfRouteError(StopIteration):
+    pass
+
+
 class RouteLine(Route):
     def __init__(self, from_point: QVector2D, to_point: QVector2D):
         self.from_point = from_point
@@ -48,7 +52,7 @@ class ComplexRoute(Route):
                 return route.get_position(distance)
             else:
                 distance -= route.get_len()
-        raise ValueError('end of route reached')
+        raise EndOfRouteError('end of route reached')
 
     def get_len(self):
         return self.length

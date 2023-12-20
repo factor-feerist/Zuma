@@ -3,6 +3,7 @@ from pathlib import Path
 from PyQt6.QtGui import QImage, QBrush, QPalette
 from PyQt6.QtWidgets import QWidget
 from PyQt6.QtCore import Qt
+from levels import level
 
 
 def get_image_path(image_file_name):
@@ -30,3 +31,11 @@ class Images:
     FROG_WITH_GUN = QImage(get_image_path('frog_with_gun.jpg'))
 
     SCARED_SNAKE = QImage(get_image_path('scared_snake.jpg'))
+
+
+class Levels:
+    FIRST = level.make_first_level()
+
+
+def get_all_levels():
+    return [Levels.FIRST]
