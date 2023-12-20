@@ -5,6 +5,23 @@ from traits.trait import Trait
 from traits.trait_holder import TraitHolder
 
 
+COLORS = \
+    {
+        0: QColor(175, 175, 175),
+        1: QColor(0, 0, 0),
+        2: QColor(255, 255, 255),
+        3: QColor(255, 175, 25),
+        4: QColor(255, 255, 0),
+        5: QColor(25, 255, 175),
+        6: QColor(0, 255, 255),
+        7: QColor(150, 25, 255),
+        8: QColor(255, 0, 255),
+        9: QColor(175, 255, 25),
+        10: QColor(25, 175, 255),
+        11: QColor(255, 25, 125)
+    }
+
+
 class Ball(TraitHolder):
     def __init__(self, radius, color_id, position: QVector2D):
         super().__init__()
@@ -15,7 +32,7 @@ class Ball(TraitHolder):
 
     def is_intersected_by(self, other):
         eps = 1e-5
-        return self.position.distanceToPoint(other.position) - 0.05 <= self.radius + other.radius
+        return self.position.distanceToPoint(other.position) - eps <= self.radius + other.radius
 
 
 class RollingBall(Trait):
@@ -47,7 +64,7 @@ class BallRepresentation(Trait):
     def draw(self, painter: QPainter, width, height):
         eps = 0.1
         ball_diameter = 2 * self.ball.radius
-        painter.setBrush(QColor(0, 200, 200))
+        painter.setBrush(COLORS[self.ball.color_id])
         rect = QRectF((self.ball.position.x() - self.ball.radius) * width, (self.ball.position.y() - self.ball.radius) * height,
                       ball_diameter * width + eps, ball_diameter * height + eps)
         # painter.drawImage(rect, self.image)

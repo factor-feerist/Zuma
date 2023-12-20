@@ -20,20 +20,22 @@ class GameWidget(QWidget):
         self.timer.timeout.connect(self.update)
         self.timer.start()
 
-        r1 = RouteLine(QVector2D(0, 0), QVector2D(0.5, 0.5))
-        r2 = RouteLine(QVector2D(0.5, 0.5), QVector2D(1, 0))
-        self.route = ComplexRoute(r1, r2)
-
-        self.ball = Ball(0.2, 1, QVector2D(0.5, 0.5))
-        self.ball.set_trait(RollingBall(self.ball))
-        self.ball.set_trait(BallRepresentation(self.ball, QImage()))
+        r1 = RouteLine(QVector2D(0.03, 0), QVector2D(0.03, 0.97))
+        r2 = RouteLine(QVector2D(0.03, 0.97), QVector2D(0.97, 0.97))
+        r3 = RouteLine(QVector2D(0.97, 0.97), QVector2D(0.97, 0.07))
+        r4 = RouteLine(QVector2D(0.97, 0.07), QVector2D(0.07, 0.07))
+        r5 = RouteLine(QVector2D(0.07, 0.07), QVector2D(0.07, 0.93))
+        r6 = RouteLine(QVector2D(0.07, 0.93), QVector2D(0.93, 0.93))
+        r7 = RouteLine(QVector2D(0.93, 0.93), QVector2D(0.93, 0.11))
+        r8 = RouteLine(QVector2D(0.93, 0.11), QVector2D(0.11, 0.11))
+        route = ComplexRoute(r1, r2, r3, r4, r5, r6, r7, r8)
+        skull_position = QVector2D(0.11, 0.11)
+        draw_skull_func = lambda painter, width, height: painter.drawEllipse(QRectF((skull_position.x() - 0.025) * width, (skull_position.y() - 0.025) * height, 0.07 * width, 0.07 * height))
+        frog_position = QVector2D(0.5, 0.5)
+        balls_count = 60
 
         self.mouse_position = QVector2D(0, 0)
-
-        self.frog = Frog(self.get_ball_generator(), QVector2D(0.5, 0.5),
-                         mouse_abs_position_getter=self.get_mouse_relative_position)
-        self.flying_balls = []
-        self.update_manager = UpdateManager(self.route, self.get_mouse_relative_position, QVector2D(0.5, 0.5), 60)
+        self.update_manager = UpdateManager(route, self.get_mouse_relative_position, frog_position, skull_position, draw_skull_func, balls_count)
         pass
 
     def mouseMoveEvent(self, event):
@@ -45,44 +47,15 @@ class GameWidget(QWidget):
 
     def mousePressEvent(self, event):
         self.update_manager.on_mouse_click()
-        #self.flying_balls.append(self.frog.fire_ball())
         pass
 
-    def get_ball_generator(self):
-        def ball_generator():
-            ball = Ball(0.1, 1, QVector2D(0, 0))
-            ball.set_trait(BallRepresentation(ball, QImage()))
-            return ball
-        return ball_generator
-
     def update(self) -> None:
-        #delta = 1 / (60 * 15)
-        #r = RollingBall.get_instance(self.ball)
-        #r.update_position_on_route(delta)
-        #self.ball.position = self.route.get_position(r.position_on_route)
-
-        #self.frog.update()
-
-        #for ball in self.flying_balls:
-        #    flying = FlyingBall.get_instance(ball)
-        #    flying.update_position_with_time(1/60)
-        #pass
         self.update_manager.update()
         super().update()
 
     def paintEvent(self, e):
         painter = QPainter()
         painter.begin(self)
-        #representer = BallRepresentation.get_instance(self.ball)
-
-        #representer.draw(painter, self.width(), self.height())
-
-
-
-        #for ball in self.flying_balls:
-            #repres = BallRepresentation.get_instance(ball)
-            #repres.draw(painter, self.width(), self.height())
-        #self.frog.draw(painter, self.width(), self.height())
         self.update_manager.draw(painter, self.width(), self.height())
         painter.end()
 
