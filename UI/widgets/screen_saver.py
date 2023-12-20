@@ -14,20 +14,21 @@ from utils import Images
 import utils
 
 
-class WinWindow(QWidget):
-    def __init__(self, on_back_to_menu):
+class ScreenSaver(QWidget):
+    def __init__(self, on_play):
         super().__init__()
-        self.on_back_to_menu = on_back_to_menu
+        self.on_play = on_play
         self.init_ui()
-        utils.set_image_to_background(self, Images.FROG_WITH_HAT)
+        utils.set_image_to_background(self, Images.FROG_WITH_GUN)
         pass
 
     def init_ui(self):
         box = QVBoxLayout(self)
-        box.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        box.setContentsMargins(50, 50, 50, 50)
+        box.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignBottom)
 
-        button = QPushButton('you win; go back', parent=self)
-        button.clicked.connect(self.on_back_to_menu)
+        button = QPushButton('PLAY', parent=self)
+        button.clicked.connect(self.on_play)
 
         box.addWidget(button)
         pass

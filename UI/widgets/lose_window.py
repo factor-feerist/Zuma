@@ -9,26 +9,24 @@ from balls import Ball, BallRepresentation, RollingBall, FlyingBall
 from route import RouteLine, ComplexRoute
 from PyQt6.QtGui import QImage
 from frog import Frog
-from PyQt6.QtCore import Qt
-from utils import Images
+from PyQt6.QtCore import pyqtSlot, Qt
 import utils
 
 
-class WinWindow(QWidget):
+class LoseWindow(QWidget):
     def __init__(self, on_back_to_menu):
         super().__init__()
         self.on_back_to_menu = on_back_to_menu
         self.init_ui()
-        utils.set_image_to_background(self, Images.FROG_WITH_HAT)
+        utils.set_image_to_background(self, utils.Images.SCARED_SNAKE)
         pass
 
     def init_ui(self):
         box = QVBoxLayout(self)
         box.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        button = QPushButton('you win; go back', parent=self)
+        button = QPushButton('you lost; go back', parent=self)
         button.clicked.connect(self.on_back_to_menu)
-
         box.addWidget(button)
         pass
 
