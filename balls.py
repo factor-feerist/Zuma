@@ -13,6 +13,10 @@ class Ball(TraitHolder):
         self.position = QVector2D(position)
         pass
 
+    def is_intersected_by(self, other):
+        eps = 1e-5
+        return self.position.distanceToPoint(other.position) - eps <= self.radius + other.radius
+
 
 class RollingBall(Trait):
     def __init__(self, ball: Ball, position_on_route=0):
@@ -39,7 +43,7 @@ class BallRepresentation(Trait):
         eps = 0.1
         ball_diameter = 2 * self.ball.radius
         painter.setBrush(QColor(0, 200, 200))
-        rect = QRectF(self.ball.position.x() * width, self.ball.position.y() * height,
+        rect = QRectF((self.ball.position.x() - self.ball.radius) * width, (self.ball.position.y() - self.ball.radius) * height,
                       ball_diameter * width + eps, ball_diameter * height + eps)
         # painter.drawImage(rect, self.image)
         painter.drawEllipse(rect)
