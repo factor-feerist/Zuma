@@ -10,14 +10,17 @@ from route import RouteLine, ComplexRoute
 from PyQt6.QtGui import QImage
 from frog import Frog
 from PyQt6.QtCore import pyqtSlot, Qt
+import utils
 
 
 class LevelChoosingWindow(QWidget):
-    def __init__(self, levels, on_exit_button, *args, **kwargs):
+    def __init__(self, levels, choose_level_func, on_exit_button, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.levels = levels
+        self.choose_level_func = choose_level_func
         self.on_exit_button = on_exit_button
         self.init_ui()
+        utils.set_image_to_background(self, utils.Images.FROG_WITH_GUN)
         pass
 
     def init_ui(self):
@@ -26,9 +29,14 @@ class LevelChoosingWindow(QWidget):
         box.setContentsMargins(0, 0, 0, 0)
         box.setSpacing(20)
 
-        button = QPushButton(text='choose level [not working]')
-        button.clicked.connect(self.do_something)
-        box.addWidget(button)
+        choose_button = QPushButton(text='choose level wisely')
+        choose_button.clicked.connect(lambda: print('choose already'))
+        box.addWidget(choose_button)
+
+        for level in self.levels:
+            button = QPushButton(text=f'level {level}', parent=self)
+            button.clicked.connect(self.choose_level_maker(level))
+            box.addWidget(button)
 
         exit_button = QPushButton(text='exit')
         exit_button.clicked.connect(self.on_exit_button)
@@ -40,5 +48,8 @@ class LevelChoosingWindow(QWidget):
 
     def do_something(self):
         print('unsupported yet')
+
+    def choose_level_maker(self, level):
+        return lambda: self.choose_level_func(level)
 
     pass
