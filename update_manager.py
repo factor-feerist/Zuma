@@ -32,39 +32,82 @@ class UpdateManager:
         self.last_attached_ball_index = -1
 
         self.frog = Frog(lambda: next(self.generate_next_frog_ball()), frog_position, mouse_rel_pos_getter)
+        self.ball_summoner = self.try_summon_ball_at_route()
         pass
 
     def update(self):
+        # what is this?
         self.resolve_collisions()
-        delta = 1 / (60 * 15)
-        self.update_last_attached_ball_index()
-        if self.last_attached_ball_index == len(self.balls_on_route) - 1:
-            for ball in self.balls_on_route:
-                r = RollingBall.get_instance(ball)
-                r.update_position_on_route(delta)
-                ball.position = self.route.get_position(
-                    r.position_on_route)
-        else:
-            for ball in self.balls_on_route[self.last_attached_ball_index + 1:]:
-                r = RollingBall.get_instance(ball)
-                r.update_position_on_route(-delta)
-                ball.position = self.route.get_position(
-                    r.position_on_route)
+
+        self.update_rolling_balls_position()
+        next(self.ball_summoner)
+        self.frog.update()
         for ball in self.flying_balls:
             flying = FlyingBall.get_instance(ball)
             flying.update_position_with_time(1 / 60)
-        if self.can_add_ball(Ball(0.08, 0, self.route.routes[0].from_point)):
-            new_ball = next(self.generate_next_ball_on_route())
-            self.balls_by_color_id[new_ball.color_id] += 1
-            self.balls_on_route.insert(0, new_ball)
-            self.last_attached_ball_index += 1
-        self.frog.update()
+
+        # delta = 1 / (60 * 15)
+        # self.update_last_attached_ball_index()
+        # if self.last_attached_ball_index == len(self.balls_on_route) - 1:
+        #     for ball in self.balls_on_route:
+        #         r = RollingBall.get_instance(ball)
+        #         r.update_position_on_route(delta)
+        #         ball.position = self.route.get_position(
+        #             r.position_on_route)
+        # else:
+        #     for ball in self.balls_on_route[self.last_attached_ball_index + 1:]:
+        #         r = RollingBall.get_instance(ball)
+        #         r.update_position_on_route(-delta)
+        #         ball.position = self.route.get_position(
+        #             r.position_on_route)
+        # for ball in self.flying_balls:
+        #     flying = FlyingBall.get_instance(ball)
+        #     flying.update_position_with_time(1 / 60)
+        # if self.can_add_ball(Ball(0.08, 0, self.route.routes[0].from_point)):
+        #     new_ball = next(self.generate_next_ball_on_route())
+        #     self.balls_by_color_id[new_ball.color_id] += 1
+        #     self.balls_on_route.insert(0, new_ball)
+        #     self.last_attached_ball_index += 1
 
     def draw(self, painter, width, height):
         self.frog.draw(painter, width, height)
+        self.draw_balls(self.balls_on_route, painter, width, height)
+        self.draw_balls(self.flying_balls, painter, width, height)
+        pass
+
+    def draw_balls(self, balls, painter, width, height):
+        for b in balls:
+            BallRepresentation.get_instance(b).draw(painter, width, height)
+
+    def try_summon_ball_at_route(self):
+        def summon_ball(b):
+            self.balls_on_route.insert(0, b)
+        for ball in self.generate_next_ball_on_route():
+            while True:
+                if len(self.balls_on_route) == 0:
+                    break
+                first_rolling = RollingBall.get_instance(self.balls_on_route[0])
+                if first_rolling.position_on_route >= ball.radius + first_rolling.ball.radius:
+                    break
+                yield False
+            summon_ball(ball)
+            yield True
+        while True:
+            yield False
+        pass
+
+    def update_rolling_balls_position(self):
+        delta = 1 / (60 * 15)
+        previous_ball = None
         for b in self.balls_on_route:
             ball: Ball = b
-            BallRepresentation.get_instance(ball).draw(painter, width, height)
+            rolling = RollingBall.get_instance(ball)
+            if (previous_ball is None) or (ball.is_intersected_by(previous_ball)):
+                rolling.update_position_on_route(delta=delta)
+            else:
+                rolling.update_position_on_route(delta=-delta)
+            ball.position = self.route.get_position(rolling.position_on_route)
+        pass
 
     def update_last_attached_ball_index(self):
         print(self.last_attached_ball_index)
