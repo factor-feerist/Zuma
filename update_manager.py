@@ -1,3 +1,5 @@
+import utils
+
 from PyQt6.QtGui import QVector2D, QImage, QColor
 from PyQt6.QtCore import QRectF
 
@@ -6,6 +8,10 @@ from route import ComplexRoute
 from random import randint
 from frog import Frog
 from skull import Skull
+
+
+class WinException(Exception):
+    pass
 
 
 class UpdateManager:
@@ -34,12 +40,18 @@ class UpdateManager:
         self.end_of_game = False
         self.balls_on_route = []
         self.flying_balls = []
-        self.frog = Frog(lambda: next(self.generate_next_frog_ball()), frog_position, mouse_rel_pos_getter)
+
+        generator = self.generate_next_frog_ball()
+        self.frog = Frog(lambda: next(generator), frog_position, mouse_rel_pos_getter)
         self.ball_summoner = self.try_summon_ball_at_route()
+        self.balls_generator_stopped = False
+        self.score = 0
         pass
 
     def update(self):
         # what is this?
+        self.check_if_win()
+
         self.resolve_collisions()
 
         self.update_rolling_balls_position()
@@ -56,6 +68,10 @@ class UpdateManager:
         self.draw_balls(self.balls_on_route, painter, width, height)
         self.draw_balls(self.flying_balls, painter, width, height)
         pass
+
+    def check_if_win(self):
+        if self.balls_generator_stopped and len(self.balls_on_route) == 0:
+            raise WinException
 
     def draw_balls(self, balls, painter, width, height):
         for b in balls:
@@ -74,6 +90,7 @@ class UpdateManager:
                 yield False
             summon_ball(ball)
             yield True
+        self.balls_generator_stopped = True
         while True:
             yield False
         pass
@@ -124,12 +141,35 @@ class UpdateManager:
     def remove_same_color_segments(self):
         if len(self.balls_on_route) < 3:
             return
-        for i in range(2, len(self.balls_on_route)):
-            if self.balls_on_route[i-2].color_id == self.balls_on_route[i-1].color_id == self.balls_on_route[i].color_id:
-                self.balls_on_route.remove(self.balls_on_route[i])
-                self.balls_on_route.remove(self.balls_on_route[i-1])
-                self.balls_on_route.remove(self.balls_on_route[i-2])
-                break
+        streak = 0
+        previous_color_id = None
+        for i, b in enumerate(self.balls_on_route):
+            if previous_color_id is None:
+                streak = 1
+                previous_color_id = b.color_id
+                continue
+            if b.color_id == previous_color_id:
+                streak += 1
+                continue
+            previous_color_id = b.color_id
+            if streak > 2:
+                for j in range(streak):
+                    self.balls_on_route.remove(self.balls_on_route[i-j-1])
+                    self.score += 5
+                self.on_balls_removed()
+                return
+            streak = 1
+        if streak > 2:
+            for j in range(streak):
+                self.balls_on_route.remove(self.balls_on_route[i - j])
+                self.score += 5
+            self.on_balls_removed()
+            return
+        return
+
+    def on_balls_removed(self):
+        utils.play_sound(utils.Sounds.BALLS_DESTROYED)
+        pass
 
     def generate_next_ball_on_route(self):
         for i in range(self.balls_count):
@@ -151,6 +191,7 @@ class UpdateManager:
                         randint(0, len(self.balls_by_color_id.keys()) - 1),
                         self.frog_position)
         ball.set_trait(BallRepresentation(ball, QImage()))
+        print('start')
         yield ball
         while not self.end_of_game:
             allowed = self.get_color_ids_on_route()
@@ -159,11 +200,14 @@ class UpdateManager:
             yield ball
 
     def get_color_ids_on_route(self):
-        result = []
-        for k in self.balls_by_color_id.keys():
-            if self.balls_by_color_id[k] != 0:
-                result.append(k)
-        return result
+        result = set()
+        for b in self.balls_on_route:
+            result.add(b.color_id)
+        # result = []
+        # for k in self.balls_by_color_id.keys():
+        #     if self.balls_by_color_id[k] != 0:
+        #         result.append(k)
+        return list(result)
 
     def can_add_ball(self, ball):
         return not any(

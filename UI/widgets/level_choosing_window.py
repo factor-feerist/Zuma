@@ -1,4 +1,6 @@
 import sys
+import time
+
 from PyQt6.QtWidgets import QApplication
 import math
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton
@@ -11,6 +13,7 @@ from PyQt6.QtGui import QImage
 from frog import Frog
 from PyQt6.QtCore import pyqtSlot, Qt
 import utils
+from PyQt6.QtMultimedia import QAudioOutput, QMediaPlayer, QSoundEffect
 
 
 class LevelChoosingWindow(QWidget):
@@ -30,7 +33,7 @@ class LevelChoosingWindow(QWidget):
         box.setSpacing(20)
 
         choose_button = QPushButton(text='choose level wisely')
-        choose_button.clicked.connect(lambda: print('choose already'))
+        choose_button.clicked.connect(self.do_something)
         box.addWidget(choose_button)
 
         for level in self.levels:

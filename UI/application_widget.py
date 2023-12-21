@@ -41,10 +41,12 @@ class ApplicationWidget(QStackedWidget):
         pass
 
     def open_win_window(self):
+        utils.play_sound(utils.Sounds.APPLAUSE)
         self.setCurrentWidget(self.win_window)
         pass
 
     def open_lose_window(self):
+        utils.play_sound(utils.Sounds.SAD_TROMBONE)
         self.setCurrentWidget(self.lose_window)
         pass
 
